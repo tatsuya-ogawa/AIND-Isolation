@@ -35,7 +35,13 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_winner(player) or game.is_loser(player):
+        return game.utility(player)
+    moves = len(game.get_legal_moves())
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(moves - opp_moves + centrality(game, game.get_player_location(player)))
+    # raise NotImplementedError
 
 
 def custom_score_2(game, player):
@@ -112,6 +118,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
+
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
@@ -213,7 +220,19 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        if depth == 0:
+            return (game.get_player_location(self), self.score(game, self))
+
+        scores = [(move, self.minimax(game.forecast_move(move), depth - 1)[1]) for move in game.get_legal_moves()]
+        if game.active_player == self:
+            if len(scores) == 0:
+                return (-1,-1),float('-inf')
+            return max(scores,key=lambda x:x[1])
+        else:
+            if len(scores) == 0:
+                return (-1,-1),float('inf')
+            return min(scores,key=lambda x:x[1])
+        # raise NotImplementedError
 
 
 class AlphaBetaPlayer(IsolationPlayer):
